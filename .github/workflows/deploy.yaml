@@ -33,10 +33,10 @@ jobs:
 
       - name: Verify contracts
         run: |
-          yarn --cwd packages/hardhat hardhat verify --network baseSepolia 0xEA8F9474222E3DdD98Cd9845e594345dA1a39Eb6
-          yarn --cwd packages/hardhat hardhat verify --network baseSepolia 0x87493C1375c63A9Db5f94Ca1c80b2ac892D1bfA6 "0xEA8F9474222E3DdD98Cd9845e594345dA1a39Eb6"
-          yarn --cwd packages/hardhat hardhat verify --network baseSepolia 0xb8884Dc5335996f8a012F54d959b0e275Cf230Ca "0x87493C1375c63A9Db5f94Ca1c80b2ac892D1bfA6" "0xEA8F9474222E3DdD98Cd9845e594345dA1a39Eb6"
-          yarn --cwd packages/hardhat hardhat verify --network baseSepolia 0x31Dd18b244273400d9EB97848D397Fac39fdEE9e "0x87493C1375c63A9Db5f94Ca1c80b2ac892D1bfA6" "0xEA8F9474222E3DdD98Cd9845e594345dA1a39Eb6"
+          yarn --cwd packages/hardhat hardhat verify --network baseSepolia 0x2D55272e6Af67F33e52b63ee8384CDC61a044940
+          yarn --cwd packages/hardhat hardhat verify --network baseSepolia 0x71FC62eF75779B773E0b74eA467C24B229066262 0x2D55272e6Af67F33e52b63ee8384CDC61a044940
+          yarn --cwd packages/hardhat hardhat verify --network baseSepolia 0xb5EB13cd8408B6cE0D4829Ad5C312f9450Ac9db2 0x71FC62eF75779B773E0b74eA467C24B229066262 0x2D55272e6Af67F33e52b63ee8384CDC61a044940
+          yarn --cwd packages/hardhat hardhat verify --network baseSepolia 0x56adc737758Dac8dC0C53dE7D5cF92eFE0d07C96 0x71FC62eF75779B773E0b74eA467C24B229066262 0x2D55272e6Af67F33e52b63ee8384CDC61a044940
         env:
           ETHERSCAN_V2_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
 
