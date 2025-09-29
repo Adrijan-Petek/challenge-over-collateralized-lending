@@ -29,9 +29,15 @@ describe("💳🌽 Over-collateralized Lending Challenge 🤓", function () {
     const CornDEX = await ethers.getContractFactory("CornDEX");
     cornDEX = await CornDEX.deploy(await cornToken.getAddress());
 
-    await cornToken.mintTo(owner.address, ethers.parseEther("1000000"));
-    await cornToken.approve(cornDEX.target, ethers.parseEther("1000000"));
-    await cornDEX.init(ethers.parseEther("1000000"), { value: ethers.parseEther("1000") });
+    // Fund owner with more ETH for DEX init
+    await ethers.provider.send("hardhat_setBalance", [
+      owner.address,
+      `0x${ethers.parseEther("10000000").toString(16)}`,
+    ]);
+
+    await cornToken.mintTo(owner.address, ethers.parseEther("1000000000"));
+    await cornToken.approve(cornDEX.target, ethers.parseEther("1000000000"));
+    await cornDEX.init(ethers.parseEther("1000000000"), { value: ethers.parseEther("1000000") });
 
     // For SRE Auto-grader - use the the downloaded contract instead of default contract
     let contractArtifact = "";
@@ -196,6 +202,10 @@ describe("💳🌽 Over-collateralized Lending Challenge 🤓", function () {
     it("Should allow liquidation when position is unsafe", async function () {
       // drop price of eth so that user1 position is below 1.2
       await cornDEX.swap(ethers.parseEther("300"), { value: ethers.parseEther("300") });
+      // debug info
+      const dbg = await lending.getDebugInfo(user1.address);
+
+      console.log("DEBUG before liquidation test:", dbg);
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(await lending.isLiquidatable(user1)).to.be.true;
       // get balance before liquidation

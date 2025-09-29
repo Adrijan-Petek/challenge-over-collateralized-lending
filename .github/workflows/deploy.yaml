@@ -1,0 +1,69 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Run tests
+        run: yarn --cwd packages/hardhat test
+
+      - name: Deploy to Base Sepolia
+        run: yarn --cwd packages/hardhat deploy --network baseSepolia
+        env:
+          __RUNTIME_DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+
+      - name: Verify contracts
+        run: |
+          yarn --cwd packages/hardhat hardhat verify --network baseSepolia 0xEA8F9474222E3DdD98Cd9845e594345dA1a39Eb6
+          yarn --cwd packages/hardhat hardhat verify --network baseSepolia 0x87493C1375c63A9Db5f94Ca1c80b2ac892D1bfA6 "0xEA8F9474222E3DdD98Cd9845e594345dA1a39Eb6"
+          yarn --cwd packages/hardhat hardhat verify --network baseSepolia 0xb8884Dc5335996f8a012F54d959b0e275Cf230Ca "0x87493C1375c63A9Db5f94Ca1c80b2ac892D1bfA6" "0xEA8F9474222E3DdD98Cd9845e594345dA1a39Eb6"
+          yarn --cwd packages/hardhat hardhat verify --network baseSepolia 0x31Dd18b244273400d9EB97848D397Fac39fdEE9e "0x87493C1375c63A9Db5f94Ca1c80b2ac892D1bfA6" "0xEA8F9474222E3DdD98Cd9845e594345dA1a39Eb6"
+        env:
+          ETHERSCAN_V2_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
+
+  deploy-frontend:
+    needs: deploy-contracts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build Next.js
+        run: yarn --cwd packages/nextjs build
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: packages/nextjs
+          vercel-args: --prod
